@@ -1,0 +1,8 @@
+node_modules/
+build/
+dist/
+imgs/
+*.log
+.env
+.vscode
+LogDesenv.txt
