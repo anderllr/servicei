@@ -8,17 +8,13 @@ const env = require ('dotenv').config ();
 var path = require ('path');
 
 import schema from './src/graphql/schema';
-///RESOLVI ATÉ AQUI
-
 import {db} from './src/models';
 import {tokenMiddleware} from './src/utils/tokenMiddleware';
-import {verifyAdmin, verifyFrota} from './src/utils/firstData';
-
-/*
+import {verifyAdmin} from './src/utils/firstData';
 
 import {MONGODB_URI, MONGO_PASSWORD, MONGO_USER} from './src/utils/utils';
 
-const APP_NAME = 'flamingoapp';
+const APP_NAME = 'serviceiapp';
 
 const MONGO_LOCAL = `mongodb://127.0.0.1:27017/${APP_NAME}`;
 
@@ -27,7 +23,7 @@ const MONGO_URI = MONGODB_URI ? MONGODB_URI : MONGO_LOCAL;
 let options = {
   useNewUrlParser: true,
 };
-*/
+
 /* Já estava comentado
 if (MONGO_USER && MONGO_PASSWORD) {
 	options.user = MONGO_USER;
@@ -37,14 +33,13 @@ console.log("Mongo Link: ", MONGO_URI);
 console.log("Options: ", options);
 */
 
-/*
 mongoose.connect (MONGO_URI, options);
-*/
+
 const PORT = process.env.port || 3002;
 //const HOST = process.env.host || "192.168.1.109";
 
 const app = express ();
-/* anderson
+
 //Middleware to put db in request and later in context
 const dbRequest = (req, res, next) => {
   req['context']['db'] = db;
@@ -74,7 +69,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 verifyAdmin ();
-verifyFrota ();
 
 app.use (
   cors ({
@@ -87,7 +81,7 @@ app.use (
 );
 
 app.use (
-  '/flamingoql',
+  '/serviceiql',
   apolloUploadExpress ({maxFileSize: 100000000, maxFiles: 100}),
   tokenMiddleware,
   dbRequest,
@@ -101,5 +95,5 @@ app.use (
 );
 
 app.use ('/imgs/', express.static ('./imgs'));
-*/
+
 app.listen (PORT, () => console.log (`Server connected at port: ${PORT}`));

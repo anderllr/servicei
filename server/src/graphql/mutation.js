@@ -1,4 +1,5 @@
 import { userMutations } from "./types/user.schema";
+import { empresaMutations } from "./types/empresa.schema";
 /*import { clienteMutations } from "./types/cliente.schema";
 import { frotaMutations } from "./types/frota.schema";
 import { grupoItemMutations } from "./types/grupoitem.schema";
@@ -26,7 +27,8 @@ const Mutation = `
 
 const Mutation = `
     type Mutation {
-        ${userMutations}
+        ${userMutations},
+        ${empresaMutations}
     }
 `;
 

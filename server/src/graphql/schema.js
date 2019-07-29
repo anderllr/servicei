@@ -5,6 +5,7 @@ import { Query } from "./query";
 import { Mutation } from "./mutation";
 
 import { userTypes } from "./types/user.schema";
+import { empresaTypes } from "./types/empresa.schema";
 /*import { frotaTypes } from "./types/frota.schema";
 import { clienteTypes } from "./types/cliente.schema";
 import { grupoItemTypes } from "./types/grupoitem.schema";
@@ -15,6 +16,7 @@ import { caminhaoTypes } from "./types/caminhao.schema";
 import { freteTypes } from "./types/frete.schema";
 */
 import userResolvers from "./resolvers/user.resolver";
+import empresaResolvers from "./resolvers/user.resolver";
 /*import frotaResolvers from "./resolvers/frota.resolver";
 import clienteResolvers from "./resolvers/cliente.resolver";
 import grupoItemResolvers from "./resolvers/grupoitem.resolver";
@@ -40,7 +42,8 @@ const resolvers = merge(
 
 //using lodash to merge my resolvers
 const resolvers = merge(
-	userResolvers
+    userResolvers,
+    empresaResolvers
 );
 
 const SchemaDefinition = `
@@ -74,7 +77,8 @@ export default makeExecutableSchema({
 		SchemaDefinition,
 		Query,
 		Mutation,
-		userTypes
+        userTypes,
+        empresaTypes
 	],
 	resolvers
 });

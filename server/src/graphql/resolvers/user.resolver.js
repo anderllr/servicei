@@ -1,14 +1,14 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import { JWT_SECRET } from "../../utils/utils";
+import { JWT_SECRET, ADMIN_USER } from "../../utils/utils";
 import { authenticated } from "./auth.resolver";
 
 export default {
 	Query: {
 		users: authenticated(async (parent, args, { db: { User } }) => {
 			//Find users excluding admin
-			const users = await User.find({ userName: { $nin: ["admin"] } });
+			const users = await User.find({ userName: { $nin: [ADMIN_USER] } });
 			return users.map(user => {
 				user._id = user._id.toString();
 				return user;

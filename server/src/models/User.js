@@ -14,8 +14,7 @@ const UserSchema = mongoose.Schema({
 		required: true,
 		trim: true
 	},
-	app: { type: Boolean, required: true },
-	web: { type: Boolean, required: true },
+	contador: { type: Boolean, required: true },
 	email: {
 		type: String,
 		unique: true,

@@ -6,6 +6,7 @@ const userTypes = `
         name: String!
         userName: String!
         email: String!
+        contador: Boolean!
     }
 
     type Token {
@@ -16,6 +17,7 @@ const userTypes = `
         name: String!
         userName: String!
         email: String!
+        contador: Boolean!
         password: String!
     }
 
@@ -23,6 +25,7 @@ const userTypes = `
         name: String!
         userName: String!
         email: String!
+        contador: Boolean!
     }
 
     input UserUpdatePasswordInput {

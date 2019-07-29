@@ -11,6 +11,7 @@ const env = require("dotenv").config();
 
 export const JWT_SECRET = process.env.AUTH_SECRET;
 export const GEN_SALT_NUMBER = process.env.GEN_SALT_NUMBER;
+export const ADMIN_USER = process.env.ADMIN_USER;
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 export const MONGO_USER = process.env.MONGO_USER;

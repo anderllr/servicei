@@ -1,4 +1,5 @@
 import { userQueries } from "./types/user.schema";
+import { empresaQueries } from "./types/empresa.schema";
 /*import { frotaQueries } from "./types/frota.schema";
 import { clienteQueries } from "./types/cliente.schema";
 import { grupoItemQueries } from "./types/grupoitem.schema";
@@ -25,7 +26,8 @@ const Query = `
 */
 const Query = `
     type Query {
-        ${userQueries}
+        ${userQueries},
+        ${empresaQueries}
     }
 `;
 

@@ -1,22 +1,24 @@
 //Função modelo para trazer carga padrão
 
 import {db} from '../models';
-import {ADMIN_PASSWORD, ADMIN_EMAIL} from './utils';
-
+import {ADMIN_USER, ADMIN_PASSWORD, ADMIN_EMAIL} from './utils';
+/*
 const {User, Frota, GrupoItem} = db;
 import dbFrota from './dbFrota';
+*/
+
+const {User} = db;
 
 const adminUser = {
   name: 'Administrador do Sistema',
-  userName: 'admin',
-  app: true,
-  web: true,
+  userName: ADMIN_USER,
+  contador: true,
   email: ADMIN_EMAIL,
   password: ADMIN_PASSWORD,
 };
 
 const existUser = async () => {
-  const user = await User.find ({userName: 'admin'});
+  const user = await User.find ({userName: ADMIN_USER });
   return user.length > 0;
 };
 
@@ -27,7 +29,7 @@ export const verifyAdmin = async () => {
     User (adminUser).save ();
   }
 };
-
+/*
 const existFrota = async () => {
   const frota = await Frota.find ();
   return frota.length > 0;
@@ -40,13 +42,5 @@ export const verifyFrota = async () => {
       await Frota (frota).save ();
     });
   }
-};
-/*
-const existFrotaItens = async () => {
-	const result = await Frota.aggregate([
-		{ $project: { totalGrupos: { $size: "$grupos" } } },
-		{ $group: { _id: null, count: { $sum: "$totalGrupos" } } }
-	]);
-	return result[0].count > 0;
 };
 */
