@@ -12,9 +12,10 @@ export default {
 			const empresa = await Empresa.findById(args.id);
 			return empresa;
 		}),
-		empresasByRazao: authenticated(
+		empresasByName: authenticated(
 			async (parent, { name }, { db: { Empresa } }) => {
-				const empresas = await Empresa.find({ name: new RegExp(razao, "i") });
+                //TODO: Colocar a busca para razao ou fantasia, afim de trazer todos os registros
+				const empresas = await Empresa.find({ razao: new RegExp(name, "i") });
 				return empresas.map(empresa => {
 					empresa._id = empresa._id.toString();
 					return empresa;
@@ -25,7 +26,7 @@ export default {
 	Mutation: {
 		createEmpresa: authenticated(
 			async (parent, { input }, { db: { Empresa } }) => {
-				const empresa = await new Empresa(input).save();
+                const empresa = await new Empresa(input).save();
 				return empresa;
 			}
 		),

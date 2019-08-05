@@ -27,4 +27,4 @@ const EmpresaSchema = mongoose.Schema({
     stEmpresa: {type: String, required: true}
 });
 
-export const Empresa = mongoose.model("Empresa", EmpresaSchema);
+export const Empresa = mongoose.model('Empresa', EmpresaSchema);

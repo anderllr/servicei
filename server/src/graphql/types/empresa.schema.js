@@ -44,7 +44,7 @@ const empresaTypes = `
 const empresaQueries = `
     empresas: [Empresa]
     empresaById(id: ID!): Empresa!
-    empresasByRazao(razao: String!): [Empresa]
+    empresasByName(name: String!): [Empresa]
 `;
 
 const empresaMutations = `

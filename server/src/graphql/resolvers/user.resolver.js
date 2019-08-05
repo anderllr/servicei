@@ -7,7 +7,7 @@ import { authenticated } from "./auth.resolver";
 export default {
 	Query: {
 		users: authenticated(async (parent, args, { db: { User } }) => {
-			//Find users excluding admin
+            //Find users excluding admin
 			const users = await User.find({ userName: { $nin: [ADMIN_USER] } });
 			return users.map(user => {
 				user._id = user._id.toString();

@@ -16,7 +16,7 @@ import { caminhaoTypes } from "./types/caminhao.schema";
 import { freteTypes } from "./types/frete.schema";
 */
 import userResolvers from "./resolvers/user.resolver";
-import empresaResolvers from "./resolvers/user.resolver";
+import empresaResolvers from "./resolvers/empresa.resolver";
 /*import frotaResolvers from "./resolvers/frota.resolver";
 import clienteResolvers from "./resolvers/cliente.resolver";
 import grupoItemResolvers from "./resolvers/grupoitem.resolver";
