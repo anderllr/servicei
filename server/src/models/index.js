@@ -7,22 +7,11 @@ import { GrupoItem } from "./GrupoItem";
 import { Cliente } from "./Cliente";
 */
 import { User } from "./User";
+import { AccessLog } from "./AccessLog";
 import { Empresa } from "./Empresa";
-
-/*
-export const db = {
-	Caminhao,
-	Frota,
-	Marca,
-	GrupoItem,
-	Cliente,
-	User,
-	Vistoria,
-	Frete
-};
-*/
 
 export const db = {
     User,
+    AccessLog,
     Empresa
 };

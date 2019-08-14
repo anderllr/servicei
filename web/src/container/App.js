@@ -6,6 +6,8 @@ import { connect } from 'react-redux';
 import { Redirect, Route } from 'react-router-dom';
 import { NotificationContainer } from 'react-notifications';
 
+import AdminRoute from "./AdminRoute";
+
 // rct theme provider
 import RctThemeProvider from './RctThemeProvider';
 
@@ -39,21 +41,6 @@ import {
    AsyncTermsConditionComponent
 } from 'Components/AsyncComponent/AsyncComponent';
 
-//Auth0
-import Auth from '../Auth/Auth';
-
-// callback component
-import Callback from "Components/Callback/Callback";
-
-//Auth0 Handle Authentication
-const auth = new Auth();
-
-const handleAuthentication = ({ location }) => {
-   if (/access_token|id_token|error/.test(location.hash)) {
-      auth.handleAuthentication();
-   }
-}
-
 /**
  * Initial Path To Check Whether User Is Logged In Or Not
  */
@@ -73,8 +60,9 @@ const InitialPath = ({ component: Component, ...rest, authUser }) =>
 
 class App extends Component {
    render() {
-      const { location, match, user } = this.props;
-      if (location.pathname === '/') {
+       const { location, match, user } = this.props;
+       //Verifica se está dentro da raiz para direcionar para autenticação ou dashboard
+       if (location.pathname === '/') {
          if (user === null) {
             return (<Redirect to={'/signin'} />);
          } else {
@@ -89,10 +77,10 @@ class App extends Component {
                authUser={user}
                component={RctDefaultLayout}
             />
-            <Route path="/horizontal" component={HorizontalLayout} />
-            <Route path="/agency" component={AgencyLayout} />
-            <Route path="/boxed" component={RctBoxedLayout} />
-            <Route path="/dashboard" component={CRMLayout} />
+            <AdminRoute path="/horizontal" component={HorizontalLayout} />
+            <AdminRoute path="/agency" component={AgencyLayout} />
+            <AdminRoute path="/boxed" component={RctBoxedLayout} />
+            <AdminRoute path="/dashboard" component={CRMLayout} authUser={user}/>
             <Route path="/signin" component={AppSignIn} />
             <Route path="/signup" component={AppSignUp} />
             <Route path="/session/login" component={AsyncSessionLoginComponent} />
@@ -105,10 +93,6 @@ class App extends Component {
             <Route path="/session/404" component={AsyncSessionPage404Component} />
             <Route path="/session/500" component={AsyncSessionPage500Component} />
             <Route path="/terms-condition" component={AsyncTermsConditionComponent} />
-            <Route path="/callback" render={(props) => {
-               handleAuthentication(props);
-               return <Callback {...props} />
-            }} />
          </RctThemeProvider>
       );
    }

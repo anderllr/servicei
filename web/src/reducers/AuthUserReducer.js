@@ -9,19 +9,18 @@ import {
     SIGNUP_USER,
     SIGNUP_USER_SUCCESS,
     SIGNUP_USER_FAILURE
-} from 'Actions/types';
+} from "Actions/types";
 
 /**
  * initial auth user
  */
 const INIT_STATE = {
-    user: localStorage.getItem('user_id'),
+    user: null,
     loading: false
 };
 
 export default (state = INIT_STATE, action) => {
     switch (action.type) {
-
         case LOGIN_USER:
             return { ...state, loading: true };
 
@@ -43,6 +42,7 @@ export default (state = INIT_STATE, action) => {
         case SIGNUP_USER_FAILURE:
             return { ...state, loading: false };
 
-        default: return { ...state };
+        default:
+            return { ...state };
     }
-}
+};

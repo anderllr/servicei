@@ -2,136 +2,155 @@
  * Auth Actions
  * Auth Action With Google, Facebook, Twitter and Github
  */
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import firebase from "firebase/app";
+import "firebase/auth";
 
-import { NotificationManager } from 'react-notifications';
+import { NotificationManager } from "react-notifications";
 import {
-   LOGIN_USER,
-   LOGIN_USER_SUCCESS,
-   LOGIN_USER_FAILURE,
-   LOGOUT_USER,
-   SIGNUP_USER,
-   SIGNUP_USER_SUCCESS,
-   SIGNUP_USER_FAILURE
-} from 'Actions/types';
+    LOGIN_USER,
+    LOGIN_USER_SUCCESS,
+    LOGIN_USER_FAILURE,
+    LOGOUT_USER,
+    SIGNUP_USER,
+    SIGNUP_USER_SUCCESS,
+    SIGNUP_USER_FAILURE
+} from "Actions/types";
 
 /**
  * Redux Action To Sigin User With Firebase
  */
-export const signinUserInFirebase = (user, history) => (dispatch) => {
-   dispatch({ type: LOGIN_USER });
-   firebase.auth()
-      .signInWithEmailAndPassword(user.email, user.password)
-      .then((user) => {
-         localStorage.setItem("user_id", "user-id");
-         dispatch({ type: LOGIN_USER_SUCCESS, payload: localStorage.getItem('user_id') });
-         history.push('/');
-         NotificationManager.success('User Login Successfully!');
-      })
-      .catch((error) => {
-         dispatch({ type: LOGIN_USER_FAILURE });
-         NotificationManager.error(error.message);
-      });
-}
+export const signinUser = (history, stateUser, loginuser) => dispatch => {
+    const { email, password } = stateUser;
+    //Execute mutation
+    loginuser({ variables: { email, password } })
+        .then(({ data: { loginemail } }) => {
+            const { token, ...user } = loginemail;
+
+            localStorage.setItem("access_token_", token);
+            dispatch({ type: LOGIN_USER_SUCCESS, payload: user });
+            history.push("/");
+            NotificationManager.success(`Olá ${user.name}!`);
+        })
+        .catch(e => {
+            //TODO criar uma action que vai alterar o erro
+            const { graphQLErrors } = e;
+
+            dispatch({ type: LOGIN_USER_FAILURE });
+            NotificationManager.error(graphQLErrors[0].message);
+        });
+};
 
 /**
  * Redux Action To Signout User From  Firebase
  */
-export const logoutUserFromFirebase = () => (dispatch) => {
-   firebase.auth().signOut()
-      .then(() => {
-         dispatch({ type: LOGOUT_USER });
-         localStorage.removeItem('user_id');
-         NotificationManager.success('User Logout Successfully');
-      })
-      .catch((error) => {
-         NotificationManager.error(error.message);
-      })
-}
+export const logoutUserFromFirebase = () => dispatch => {
+    firebase
+        .auth()
+        .signOut()
+        .then(() => {
+            dispatch({ type: LOGOUT_USER });
+            localStorage.removeItem("user_id");
+            NotificationManager.success("User Logout Successfully");
+        })
+        .catch(error => {
+            NotificationManager.error(error.message);
+        });
+};
 
 /**
  * Redux Action To Signup User In Firebase
  */
-export const signupUserInFirebase = (user, history) => (dispatch) => {
-   dispatch({ type: SIGNUP_USER });
-   firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-      .then((success) => {
-         localStorage.setItem("user_id", "user-id");
-         dispatch({ type: SIGNUP_USER_SUCCESS, payload: localStorage.getItem('user_id') });
-         history.push('/');
-         NotificationManager.success('Account Created Successfully!');
-      })
-      .catch((error) => {
-         dispatch({ type: SIGNUP_USER_FAILURE });
-         NotificationManager.error(error.message);
-      })
-}
+export const signupUserInFirebase = (user, history) => dispatch => {
+    dispatch({ type: SIGNUP_USER });
+    firebase
+        .auth()
+        .createUserWithEmailAndPassword(user.email, user.password)
+        .then(success => {
+            localStorage.setItem("user_id", "user-id");
+            dispatch({
+                type: SIGNUP_USER_SUCCESS,
+                payload: localStorage.getItem("user_id")
+            });
+            history.push("/");
+            NotificationManager.success("Account Created Successfully!");
+        })
+        .catch(error => {
+            dispatch({ type: SIGNUP_USER_FAILURE });
+            NotificationManager.error(error.message);
+        });
+};
 
 /**
- * Redux Action To Signin User In Firebase With Facebook
+ * Redux Action To Signin User With Auth to:
+ * Facebook, Google, Twitter, GitHub
  */
-export const signinUserWithFacebook = (history) => (dispatch) => {
-   dispatch({ type: LOGIN_USER });
-   const provider = new firebase.auth.FacebookAuthProvider();
-   firebase.auth().signInWithPopup(provider).then(function (result) {
-      localStorage.setItem("user_id", "user-id");
-      dispatch({ type: LOGIN_USER_SUCCESS, payload: localStorage.getItem('user_id') });
-      history.push('/');
-      NotificationManager.success(`Hi ${result.user.displayName}!`);
-   }).catch(function (error) {
-      dispatch({ type: LOGIN_USER_FAILURE });
-      NotificationManager.error(error.message);
-   });
-}
+export const authP = provider => {
+    switch (provider) {
+        case "facebook":
+            return new firebase.auth.FacebookAuthProvider();
+        case "google":
+            return new firebase.auth.GoogleAuthProvider();
+        case "twitter":
+            return new firebase.auth.TwitterAuthProvider();
+        case "github":
+            return new firebase.auth.GithubAuthProvider();
+        default:
+            return { ...state };
+    }
+};
 
-/**
- * Redux Action To Signin User In Firebase With Google
- */
-export const signinUserWithGoogle = (history) => (dispatch) => {
-   dispatch({ type: LOGIN_USER });
-   const provider = new firebase.auth.GoogleAuthProvider();
-   firebase.auth().signInWithPopup(provider).then(function (result) {
-      localStorage.setItem("user_id", "user-id");
-      dispatch({ type: LOGIN_USER_SUCCESS, payload: localStorage.getItem('user_id') });
-      history.push('/');
-      NotificationManager.success(`Hi ${result.user.displayName}!`);
-   }).catch(function (error) {
-      dispatch({ type: LOGIN_USER_FAILURE });
-      NotificationManager.error(error.message);
-   });
-}
+export const signinUserWithAuth = (
+    history,
+    loginauth,
+    provider
+) => dispatch => {
+    dispatch({ type: LOGIN_USER });
 
-/**
- * Redux Action To Signin User In Firebase With Github
- */
-export const signinUserWithGithub = (history) => (dispatch) => {
-   dispatch({ type: LOGIN_USER });
-   const provider = new firebase.auth.GithubAuthProvider();
-   firebase.auth().signInWithPopup(provider).then(function (result) {
-      localStorage.setItem("user_id", "user-id");
-      dispatch({ type: LOGIN_USER_SUCCESS, payload: localStorage.getItem('user_id') });
-      history.push('/');
-      NotificationManager.success(`Hi ${result.user.displayName}!`);
-   }).catch(function (error) {
-      dispatch({ type: LOGIN_USER_FAILURE });
-      NotificationManager.error(error.message);
-   });
-}
+    const authProvider = authP(provider);
+    firebase
+        .auth()
+        .signInWithPopup(authProvider)
+        .then(function(result) {
+            const {
+                user: { email },
+                credential: { accessToken, providerId, signInMethod }
+            } = result;
 
-/**
- * Redux Action To Signin User In Firebase With Twitter
- */
-export const signinUserWithTwitter = (history) => (dispatch) => {
-   dispatch({ type: LOGIN_USER });
-   const provider = new firebase.auth.TwitterAuthProvider();
-   firebase.auth().signInWithPopup(provider).then(function (result) {
-      localStorage.setItem("user_id", "user-id");
-      dispatch({ type: LOGIN_USER_SUCCESS, payload: localStorage.getItem('user_id') });
-      history.push('/');
-      NotificationManager.success('User Login Successfully!');
-   }).catch(function (error) {
-      dispatch({ type: LOGIN_USER_FAILURE });
-      NotificationManager.error(error.message);
-   });
-}
+            /*    console.log(
+                "E-mail: ",
+                email,
+                "  AccessToken: ",
+                accessToken,
+                "  ProviderId: ",
+                providerId,
+                "  signInMethod: ",
+                signInMethod
+            ); */
+
+            //Agora vai fazer a função de login efetiva
+            //Execute mutation
+            loginauth({
+                variables: { email, accessToken, providerId, signInMethod }
+            })
+                .then(({ data: { loginauth } }) => {
+                    const { token, ...user } = loginauth;
+
+                    localStorage.setItem("access_token_", token);
+                    dispatch({ type: LOGIN_USER_SUCCESS, payload: user });
+                    history.push("/");
+                    NotificationManager.success(`Olá ${user.name}!`);
+                })
+                .catch(e => {
+                    //TODO criar uma action que vai alterar o erro
+                    const { graphQLErrors } = e;
+
+                    dispatch({ type: LOGIN_USER_FAILURE });
+                    NotificationManager.error(graphQLErrors[0].message);
+                });
+            //fim da função de login
+        }) //Exceção de erro do login do facebook
+        .catch(function(error) {
+            dispatch({ type: LOGIN_USER_FAILURE });
+            NotificationManager.error(error.message);
+        });
+};

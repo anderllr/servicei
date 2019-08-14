@@ -10,6 +10,11 @@ const userTypes = `
     }
 
     type Token {
+        id: ID!
+        name: String!
+        userName: String!
+        email: String!
+        contador: Boolean!
         token: String!
     }
 
@@ -37,7 +42,6 @@ const userQueries = `
     users: [ User ]
     user(id: ID!): User!
     authUser: User
-    login(userName: String!, password: String!): Token
 `;
 
 const userMutations = `
@@ -45,6 +49,9 @@ const userMutations = `
     updateUser(id: ID!, input: UserUpdateInput!): User
     updateUserPassword(lastPassword: String!, input: UserUpdatePasswordInput!): Boolean
     deleteUser(id: ID!): Boolean
+    login(userName: String!, password: String!): Token
+    loginemail(email: String!, password: String!): Token
+    loginauth(email: String!, accessToken: String!, providerId: String!, signInMethod: String!): Token
 `;
 
 export { userTypes, userQueries, userMutations };
