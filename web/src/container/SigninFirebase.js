@@ -29,7 +29,8 @@ import { signinUser, signinUserWithAuth } from "Actions";
 class Signin extends Component {
     state = {
         email: "",
-        password: ""
+        password: "",
+        checkTerms: false
     };
 
     /**
@@ -45,6 +46,9 @@ class Signin extends Component {
         }
     };
 
+    onResendEmail = () => {
+        console.log("Unverified: ", this.props.unverified);
+    };
     /**
      * On User Sign Up
      */
@@ -159,7 +163,24 @@ class Signin extends Component {
                                                         this.onUserLogin()
                                                     }
                                                 >
-                                                    Sign In
+                                                    Acessar
+                                                </Button>
+                                            </FormGroup>
+                                            <FormGroup
+                                                className="mb-15"
+                                                hidden={!this.props.unverified}
+                                            >
+                                                <Button
+                                                    color="secondary"
+                                                    className="btn-block text-white w-100"
+                                                    variant="contained"
+                                                    size="large"
+                                                    onClick={() =>
+                                                        this.onResendEmail()
+                                                    }
+                                                >
+                                                    Reenviar E-mail de
+                                                    verificação
                                                 </Button>
                                             </FormGroup>
                                         </Form>
@@ -249,8 +270,8 @@ class Signin extends Component {
 
 // map state to props
 const mapStateToProps = ({ authUser }) => {
-    const { user, loading } = authUser;
-    return { user, loading };
+    const { user, loading, unverified } = authUser;
+    return { user, loading, unverified };
 };
 
 export default compose(

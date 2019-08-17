@@ -6,7 +6,7 @@ const userTypes = `
         name: String!
         userName: String!
         email: String!
-        contador: Boolean!
+        method: String!
     }
 
     type Token {
@@ -14,7 +14,7 @@ const userTypes = `
         name: String!
         userName: String!
         email: String!
-        contador: Boolean!
+        method: String!
         token: String!
     }
 
@@ -22,15 +22,15 @@ const userTypes = `
         name: String!
         userName: String!
         email: String!
-        contador: Boolean!
-        password: String!
+        method: String!
+        password: String
     }
 
     input UserUpdateInput {
         name: String!
         userName: String!
         email: String!
-        contador: Boolean!
+        method: String!
     }
 
     input UserUpdatePasswordInput {
@@ -51,7 +51,8 @@ const userMutations = `
     deleteUser(id: ID!): Boolean
     login(userName: String!, password: String!): Token
     loginemail(email: String!, password: String!): Token
-    loginauth(email: String!, accessToken: String!, providerId: String!, signInMethod: String!): Token
+    loginvalidemail(hash: String!): Token
+    loginauth(email: String!, name: String!, accessToken: String!, providerId: String!, signInMethod: String!): Token
 `;
 
 export { userTypes, userQueries, userMutations };

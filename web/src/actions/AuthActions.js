@@ -16,8 +16,15 @@ import {
     SIGNUP_USER_FAILURE
 } from "Actions/types";
 
+import {
+    googleAuthProvider,
+    githubAuthProvider,
+    facebookAuthProvider,
+    twitterAuthProvider
+} from "../firebase";
+
 /**
- * Redux Action To Sigin User With Firebase
+ * Redux Action To Sigin User
  */
 export const signinUser = (history, stateUser, loginuser) => dispatch => {
     const { email, password } = stateUser;
@@ -32,11 +39,16 @@ export const signinUser = (history, stateUser, loginuser) => dispatch => {
             NotificationManager.success(`Olá ${user.name}!`);
         })
         .catch(e => {
+            dispatch({ type: LOGIN_USER_FAILURE });
             //TODO criar uma action que vai alterar o erro
             const { graphQLErrors } = e;
 
-            dispatch({ type: LOGIN_USER_FAILURE });
-            NotificationManager.error(graphQLErrors[0].message);
+            const message = graphQLErrors[0].message;
+
+            message === "unverified-email"
+                ? (dispatch({ type: EMAIL_VALIDATE }),
+                  NotificationManager.error("E-mail ainda não validado    "))
+                : NotificationManager.error(message);
         });
 };
 
@@ -58,25 +70,29 @@ export const logoutUserFromFirebase = () => dispatch => {
 };
 
 /**
- * Redux Action To Signup User In Firebase
+ * Redux Action To Signup User
  */
-export const signupUserInFirebase = (user, history) => dispatch => {
-    dispatch({ type: SIGNUP_USER });
-    firebase
-        .auth()
-        .createUserWithEmailAndPassword(user.email, user.password)
-        .then(success => {
-            localStorage.setItem("user_id", "user-id");
-            dispatch({
-                type: SIGNUP_USER_SUCCESS,
-                payload: localStorage.getItem("user_id")
-            });
-            history.push("/");
-            NotificationManager.success("Account Created Successfully!");
+
+export const signupUser = (history, stateUser, createUser) => dispatch => {
+    const { name, email, password } = stateUser;
+    //Execute mutation
+    createuser({
+        variables: { name, userName: email, email, method: "email", password }
+    })
+        .then(({ data: { createuser } }) => {
+            const { id } = createUser;
+
+            dispatch({ type: SIGNUP_USER_SUCCESS });
+            NotificationManager.success(
+                "Conta criada com sucesso, um e-mail foi enviado para validação!"
+            );
         })
-        .catch(error => {
+        .catch(e => {
+            //TODO criar uma action que vai alterar o erro
+            const { graphQLErrors } = e;
+
             dispatch({ type: SIGNUP_USER_FAILURE });
-            NotificationManager.error(error.message);
+            NotificationManager.error(graphQLErrors[0].message);
         });
 };
 
@@ -87,13 +103,13 @@ export const signupUserInFirebase = (user, history) => dispatch => {
 export const authP = provider => {
     switch (provider) {
         case "facebook":
-            return new firebase.auth.FacebookAuthProvider();
+            return facebookAuthProvider; // new firebase.auth.FacebookAuthProvider();
         case "google":
-            return new firebase.auth.GoogleAuthProvider();
+            return googleAuthProvider; //new firebase.auth.GoogleAuthProvider();
         case "twitter":
-            return new firebase.auth.TwitterAuthProvider();
+            return twitterAuthProvider; // new firebase.auth.TwitterAuthProvider();
         case "github":
-            return new firebase.auth.GithubAuthProvider();
+            return githubAuthProvider; // new firebase.auth.GithubAuthProvider();
         default:
             return { ...state };
     }
@@ -112,25 +128,22 @@ export const signinUserWithAuth = (
         .signInWithPopup(authProvider)
         .then(function(result) {
             const {
-                user: { email },
+                user: { email, displayName },
                 credential: { accessToken, providerId, signInMethod }
             } = result;
-
-            /*    console.log(
-                "E-mail: ",
-                email,
-                "  AccessToken: ",
-                accessToken,
-                "  ProviderId: ",
-                providerId,
-                "  signInMethod: ",
-                signInMethod
-            ); */
+            //           console.log("Result: ", result);
+            //  console.log("E-mail: ", email, "  AccessToken: ", accessToken, "  ProviderId: ", providerId, "  signInMethod: ", signInMethod);
 
             //Agora vai fazer a função de login efetiva
             //Execute mutation
             loginauth({
-                variables: { email, accessToken, providerId, signInMethod }
+                variables: {
+                    email,
+                    name: displayName,
+                    accessToken,
+                    providerId,
+                    signInMethod
+                }
             })
                 .then(({ data: { loginauth } }) => {
                     const { token, ...user } = loginauth;

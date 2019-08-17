@@ -1,20 +1,18 @@
 /**
  * Firebase Login
- * Reactify comes with built in firebase login feature
- * You Need To Add Your Firsebase App Account Details Here
  */
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/database";
 
-// Initialize Firebase 
-const config = {
-   apiKey: "AIzaSyD_2FLh1f_BJyKdzeqMvF-oB9Av2cLG6ps", // Your Api key will be here
-   authDomain: "reactify-61b82.firebaseapp.com", // Your auth domain
-   databaseURL: "https://reactify-61b82.firebaseio.com", // data base url
-   projectId: "reactify-61b82", // project id
-   storageBucket: "", // storage bucket
-   messagingSenderId: "598228895769" // messaging sender id
+var config = {
+    apiKey: "AIzaSyCyV0cHTHOgJN1ZxXYMWEpTNeCe1Ig5FQc",
+    authDomain: "servicei-auth-project.firebaseapp.com",
+    databaseURL: "https://servicei-auth-project.firebaseio.com",
+    projectId: "servicei-auth-project",
+    storageBucket: "",
+    messagingSenderId: "728788994483",
+    appId: "1:728788994483:web:7de496189b30689d"
 };
 
 firebase.initializeApp(config);
@@ -27,10 +25,10 @@ const twitterAuthProvider = new firebase.auth.TwitterAuthProvider();
 const database = firebase.database();
 
 export {
-   auth,
-   googleAuthProvider,
-   githubAuthProvider,
-   facebookAuthProvider,
-   twitterAuthProvider,
-   database
+    auth,
+    googleAuthProvider,
+    githubAuthProvider,
+    facebookAuthProvider,
+    twitterAuthProvider,
+    database
 };

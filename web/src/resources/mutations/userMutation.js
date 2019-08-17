@@ -8,7 +8,7 @@ export const LOGIN = gql`
             email
             userName
             name
-            contador
+            method
         }
     }
 `;
@@ -21,7 +21,7 @@ export const EMAIL_LOGIN = gql`
             email
             userName
             name
-            contador
+            method
         }
     }
 `;
@@ -29,12 +29,14 @@ export const EMAIL_LOGIN = gql`
 export const AUTH_LOGIN = gql`
     mutation loginauth(
         $email: String!
+        $name: String!
         $accessToken: String!
         $providerId: String!
         $signInMethod: String!
     ) {
         loginauth(
             email: $email
+            name: $name
             accessToken: $accessToken
             providerId: $providerId
             signInMethod: $signInMethod
@@ -44,7 +46,7 @@ export const AUTH_LOGIN = gql`
             email
             userName
             name
-            contador
+            method
         }
     }
 `;

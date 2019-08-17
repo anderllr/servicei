@@ -9,7 +9,6 @@ const inputLog = (userId, method, accessToken, providerId, signInMethod) => {
         userId,
         method
     };
-    console.log("Input:", input);
 
     if (method != "email") {
         input.accessToken = accessToken;
@@ -50,7 +49,7 @@ export default {
 
             const payload = { sub: user._id };
 
-            const { id, name, email, contador } = user;
+            const { id, name, email, method } = user;
 
             //Agora grava o log de acesso
             await new AccessLog(inputLog(id, "userName")).save();
@@ -59,7 +58,7 @@ export default {
                 id,
                 name,
                 email,
-                contador,
+                method,
                 userName,
                 token: jwt.sign(payload, JWT_SECRET)
             };
@@ -67,7 +66,7 @@ export default {
         loginemail: async (
             parent,
             { email, password },
-            { db: { User, AccessLog } }
+            { db: { User, UserEmail, AccessLog } }
         ) => {
             const user = await User.findOne({ email });
 
@@ -76,9 +75,15 @@ export default {
                 throw new Error(errorMsg);
             }
 
+            const useremail = await UserEmail.findOne({ userId: user._id });
+
+            if (!useremail) {
+                throw new Error("unverified-email");
+            }
+
             const payload = { sub: user._id };
 
-            const { id, userName, name, contador } = user;
+            const { id, userName, name, method } = user;
 
             //Agora grava o log de acesso
             await new AccessLog(inputLog(id, "email")).save();
@@ -87,39 +92,80 @@ export default {
                 id,
                 name,
                 email,
-                contador,
+                method,
                 userName,
                 token: jwt.sign(payload, JWT_SECRET)
             };
         },
-        loginauth: async (
+        //Rotina de login para quando o usuário fizer a validação pelo e-mail
+        loginvalidemail: async (
             parent,
-            { email, accessToken, providerId, signInMethod },
-            { db: { AccessLog, User } }
+            { hash },
+            { db: { User, UserEmail, AccessLog } }
         ) => {
-            const user = await User.findOne({ email });
+            //TODO: Rotina de validação do e-mail
+            /* const user = await User.findOne({ email });
 
-            let errorMsg = "Não autorizado, usuário não registrado!";
-            if (!user) {
+            let errorMsg = "Não autorizado, email ou senha inválido(s)!";
+            if (!user || !bcrypt.compareSync(password, user.password)) {
                 throw new Error(errorMsg);
             }
 
             const payload = { sub: user._id };
 
-            const { id, userName, name, contador } = user;
+            const { id, userName, name, method } = user;
 
             //Agora grava o log de acesso
-            const accesslog = await new AccessLog(
-                inputLog(id, "auth", accessToken, providerId, signInMethod)
-            ).save();
-
-            console.log("Access Log", accesslog);
+            await new AccessLog(inputLog(id, "email")).save();
 
             return {
                 id,
                 name,
                 email,
-                contador,
+                method,
+                userName,
+                token: jwt.sign(payload, JWT_SECRET)
+            }; */
+        },
+        loginauth: async (
+            parent,
+            { email, name, accessToken, providerId, signInMethod },
+            { db: { AccessLog, User, UserEmail } }
+        ) => {
+            let user = await User.findOne({ email });
+
+            if (!user) {
+                const inputUser = {
+                    name,
+                    userName: email,
+                    email,
+                    method: signInMethod,
+                    password: "Sign2019@@"
+                };
+                //Cadastra o usuário, pois o acesso dele já foi confirmado
+                user = await new User(inputUser).save();
+
+                let errorMsg =
+                    "Não autorizado, problemas no cadastro do usuário!";
+                if (!user) {
+                    throw new Error(errorMsg);
+                }
+            }
+
+            const payload = { sub: user._id };
+
+            const { id, userName, method } = user;
+
+            //Agora grava o log de acesso
+            await new AccessLog(
+                inputLog(id, "auth", accessToken, providerId, signInMethod)
+            ).save();
+
+            return {
+                id,
+                name,
+                email,
+                method,
                 userName,
                 token: jwt.sign(payload, JWT_SECRET)
             };
@@ -165,13 +211,13 @@ export default {
             }
         ),
         deleteUser: authenticated(async (parent, { id }, { db: { User } }) => {
-            const userRemoved = await User.findByIdAndRemove(id);
+            const userRemoved = await User.deleteOne({ _id: id });
 
-            if (!userRemoved) {
-                throw new Error("Error removing user");
+            if (userRemoved.deletedCount == 0) {
+                throw new Error("Erro ao remover usuário");
             }
 
-            return userRemoved;
+            return userRemoved.deletedCount > 0;
         })
     }
 };
