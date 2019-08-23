@@ -17,7 +17,7 @@ import {
  */
 const INIT_STATE = {
     user: null,
-    unverified: false,
+    unverified: true,
     loading: false
 };
 

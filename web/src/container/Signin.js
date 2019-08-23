@@ -1,7 +1,3 @@
-/**
- * Signin Firebase
- */
-
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { graphql, compose } from "react-apollo";
@@ -15,7 +11,12 @@ import QueueAnim from "rc-queue-anim";
 import { Fab } from "@material-ui/core";
 
 //GraphQl Queries
-import { EMAIL_LOGIN, AUTH_LOGIN } from "Mutations/userMutation";
+import {
+    EMAIL_LOGIN,
+    AUTH_LOGIN,
+    EMAIL_VALIDATE,
+    SEND_EMAIL_VALIDATE
+} from "Mutations/userMutation";
 
 // components
 import { SessionSlider } from "Components/Widgets";
@@ -47,7 +48,11 @@ class Signin extends Component {
     };
 
     onResendEmail = () => {
-        console.log("Unverified: ", this.props.unverified);
+        const fullUrl = window.location.href;
+        let rootUrl = fullUrl.replace(this.props.location.pathname, "");
+        this.props.sendEmailValidate({
+            variables: { email: "anderllr@email.com", rootUrl }
+        });
     };
     /**
      * On User Sign Up
@@ -280,6 +285,12 @@ export default compose(
     }),
     graphql(AUTH_LOGIN, {
         name: "loginauth"
+    }),
+    graphql(EMAIL_VALIDATE, {
+        name: "loginvalidemail"
+    }),
+    graphql(SEND_EMAIL_VALIDATE, {
+        name: "sendEmailValidate"
     }),
     connect(
         mapStateToProps,

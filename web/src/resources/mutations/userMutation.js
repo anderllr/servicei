@@ -51,6 +51,14 @@ export const AUTH_LOGIN = gql`
     }
 `;
 
+export const EMAIL_VALIDATE = gql`
+    mutation loginvalidemail($hash: String!) {
+        loginvalidemail(hash: $hash) {
+            result
+        }
+    }
+`;
+
 export const CREATE_USER = gql`
     mutation createUser($userInput: UserCreateInput!) {
         createUser(input: $userInput) {
@@ -82,5 +90,13 @@ export const UPDATE_PASSWORD = gql`
 export const DELETE_USER = gql`
     mutation deleteUser($id: ID!) {
         deleteUser(id: $id)
+    }
+`;
+
+export const SEND_EMAIL_VALIDATE = gql`
+    mutation sendEmailValidate($email: String!, $rootUrl: String!) {
+        sendEmailValidate(email: $email, rootUrl: $rootUrl) {
+            result
+        }
     }
 `;

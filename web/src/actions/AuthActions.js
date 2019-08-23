@@ -8,6 +8,7 @@ import "firebase/auth";
 import { NotificationManager } from "react-notifications";
 import {
     LOGIN_USER,
+    UNVERIFIED_EMAIL,
     LOGIN_USER_SUCCESS,
     LOGIN_USER_FAILURE,
     LOGOUT_USER,
@@ -46,7 +47,8 @@ export const signinUser = (history, stateUser, loginuser) => dispatch => {
             const message = graphQLErrors[0].message;
 
             message === "unverified-email"
-                ? (dispatch({ type: EMAIL_VALIDATE }),
+                ? (dispatch({ type: UNVERIFIED_EMAIL }),
+                  console.log("Message: ", message),
                   NotificationManager.error("E-mail ainda não validado    "))
                 : NotificationManager.error(message);
         });

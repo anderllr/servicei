@@ -73,6 +73,7 @@
         "material-ui-pickers": "1.0.0-rc.9",
         "moment": "^2.24.0",
         "mui-datatables": "^2.7.0",
+        "query-string": "^6.8.2",
         "rc-queue-anim": "^1.7.0",
         "react-addons-update": "^15.6.2",
         "react-apollo": "^2.5.8",

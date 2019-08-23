@@ -1,6 +1,4 @@
-/**
- * Sign Up With Firebase
- */
+
 import React, { Component } from "react";
 import { graphql, compose } from "react-apollo";
 import Button from "@material-ui/core/Button";

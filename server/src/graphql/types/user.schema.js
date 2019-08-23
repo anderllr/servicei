@@ -18,6 +18,10 @@ const userTypes = `
         token: String!
     }
 
+    type ValidEmail {
+        result: String!
+    }
+
     input UserCreateInput {
         name: String!
         userName: String!
@@ -51,8 +55,9 @@ const userMutations = `
     deleteUser(id: ID!): Boolean
     login(userName: String!, password: String!): Token
     loginemail(email: String!, password: String!): Token
-    loginvalidemail(hash: String!): Token
+    loginvalidemail(hash: String!): ValidEmail
     loginauth(email: String!, name: String!, accessToken: String!, providerId: String!, signInMethod: String!): Token
+    sendEmailValidate(email: String!, rootUrl: String!): ValidEmail
 `;
 
 export { userTypes, userQueries, userMutations };

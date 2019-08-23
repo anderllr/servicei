@@ -27,8 +27,8 @@ import RctBoxedLayout from './RctBoxedLayout';
 import CRMLayout from './CRMLayout';
 
 // app signin
-import AppSignIn from './SigninFirebase';
-import AppSignUp from './SignupFirebase';
+import AppSignIn from './Signin';
+import AppSignUp from './Signup';
 
 // async components
 import {

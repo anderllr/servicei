@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 
 import { JWT_SECRET, ADMIN_USER } from "../../utils/utils";
 import { authenticated } from "./auth.resolver";
+import { sendEmail } from "../../utils/sendEmail";
+import { encrypt, decrypt } from "../../utils/crypt";
 
 const inputLog = (userId, method, accessToken, providerId, signInMethod) => {
     const input = {
@@ -103,6 +105,28 @@ export default {
             { hash },
             { db: { User, UserEmail, AccessLog } }
         ) => {
+            console.log("URL: ", hash);
+
+            const id = "5d57e5e299ec554540512583";
+            const email = "anderllr@gmail.com";
+
+            const v = `id:${id}|email:${email}`;
+            console.log("V: ", v);
+            const en = encrypt(v);
+            console.log("Encrypt: ", en);
+
+            const d = decrypt(en);
+            console.log("Decrypt: ", d);
+
+            let textParts = d.split("|");
+
+            const idR = textParts.shift().replace("id:", "");
+            const emailR = textParts.join("|").replace("email:", "");
+
+            const obj = { idR, emailR };
+            console.log("Obj: ", obj);
+
+            return { result: "success" };
             //TODO: Rotina de validação do e-mail
             /* const user = await User.findOne({ email });
 
@@ -130,7 +154,7 @@ export default {
         loginauth: async (
             parent,
             { email, name, accessToken, providerId, signInMethod },
-            { db: { AccessLog, User, UserEmail } }
+            { db: { AccessLog, User } }
         ) => {
             let user = await User.findOne({ email });
 
@@ -173,6 +197,18 @@ export default {
         createUser: authenticated(
             async (parent, { input }, { db: { User } }) => {
                 const user = await new User(input).save();
+
+                //se deu tudo certo no cadastro do usuário vai mandar o link de boas vindas
+                if (user) {
+                    //Envia e-mail de boas vindas para autenticação
+
+                    const res = sendEmail(
+                        "anderllr@gmail.com",
+                        "E-mail de boas vindas"
+                    );
+                    return { result: res ? "sucess" : "error" };
+                }
+
                 return user;
             }
         ),
@@ -218,6 +254,40 @@ export default {
             }
 
             return userRemoved.deletedCount > 0;
-        })
+        }),
+        //Rotina de login para quando o usuário fizer a validação pelo e-mail
+        sendEmailValidate: async (
+            parent,
+            { email, rootUrl },
+            { db: { User, UserEmail, AccessLog } }
+        ) => {
+            const user = await User.findOne({ email });
+
+            if (!user) {
+                throw new Error("E-mail não encontrado");
+            }
+
+            if (user.method != "email") {
+                throw new Error(
+                    `E-mail já validado via autenticação: ${user.method}`
+                );
+            }
+            const useremail = await UserEmail.findOne({ userId: user._id });
+
+            if (useremail) {
+                throw new Error("E-mail já verificado anteriormente!");
+            }
+
+            const v = encrypt(`id:${user._id}|email:${email}`);
+
+            const result = await sendEmail(
+                email,
+                "Bem vindo ao Servicei",
+                `${rootUrl}/v=${v}`
+            );
+
+            console.log("result: ", result);
+            return { result: "success" };
+        }
     }
 };
