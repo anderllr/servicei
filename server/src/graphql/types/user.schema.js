@@ -7,6 +7,8 @@ const userTypes = `
         userName: String!
         email: String!
         method: String!
+        masterUserId: String
+        stUser: String
     }
 
     type Token {
@@ -15,6 +17,8 @@ const userTypes = `
         userName: String!
         email: String!
         method: String!
+        masterUserId: String
+        stUser: String
         token: String!
     }
 
@@ -28,6 +32,8 @@ const userTypes = `
         email: String!
         method: String!
         password: String
+        masterUserId: String
+        stUser: String
     }
 
     input UserUpdateInput {
@@ -35,6 +41,8 @@ const userTypes = `
         userName: String!
         email: String!
         method: String!
+        masterUserId: String
+        stUser: String
     }
 
     input UserUpdatePasswordInput {

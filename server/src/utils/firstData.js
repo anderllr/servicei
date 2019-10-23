@@ -2,6 +2,28 @@
 
 import {db} from '../models';
 import {ADMIN_USER, ADMIN_PASSWORD, ADMIN_EMAIL} from './utils';
+
+import {parse as parseOFX} from './ofx';
+import fs from 'mz/fs';
+
+export const verifyOfx = () => {
+
+    const ofxString = fs.readFileSync('./src/data/01a09-10-Caixa.ofx','utf8');
+
+    parseOFX(ofxString).then(ofxData => {
+        const statementResponse = ofxData.OFX.BANKMSGSRSV1.STMTTRNRS.STMTRS;
+        const accountId = statementResponse.BANKACCTFROM.ACCTID;
+        const currencyCode = statementResponse.CURDEF;
+        const transactionStatement = statementResponse.BANKTRANLIST.STMTTRN;
+        console.log('statementResponse: ', statementResponse);
+        console.log('accountId: ', accountId);
+        console.log('currencyCode: ', currencyCode);
+        console.log('transactionStatement: ', transactionStatement);
+
+        // do something...
+    });
+}
+
 /*
 const {User, Frota, GrupoItem} = db;
 import dbFrota from './dbFrota';

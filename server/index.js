@@ -10,7 +10,7 @@ var path = require("path");
 import schema from "./src/graphql/schema";
 import { db } from "./src/models";
 import { tokenMiddleware } from "./src/utils/tokenMiddleware";
-import { verifyAdmin } from "./src/utils/firstData";
+import { verifyAdmin, verifyOfx } from "./src/utils/firstData";
 
 import { MONGODB_URI, MONGO_PASSWORD, MONGO_USER } from "./src/utils/utils";
 
@@ -70,6 +70,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 verifyAdmin();
+//verifyOfx();
 
 app.use(
     cors({

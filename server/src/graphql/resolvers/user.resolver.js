@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 import { JWT_SECRET, ADMIN_USER } from "../../utils/utils";
-import { authenticated } from "./auth.resolver";
+import { authenticated, masterUserId } from "./auth.resolver";
 import { sendEmail } from "../../utils/sendEmail";
 import { encrypt, decrypt } from "../../utils/crypt";
 
@@ -23,14 +24,25 @@ const inputLog = (userId, method, accessToken, providerId, signInMethod) => {
 
 export default {
     Query: {
-        users: authenticated(async (parent, args, { db: { User } }) => {
-            //Find users excluding admin
-            const users = await User.find({ userName: { $nin: [ADMIN_USER] } });
-            return users.map(user => {
-                user._id = user._id.toString();
-                return user;
-            });
-        }),
+        users: authenticated(
+            async (parent, args, { db: { User }, authUser }) => {
+                const masterId = masterUserId(authUser);
+                console.log("MasterUserId: ", masterId);
+                //Find users excluding admin
+                const users = await User.find({
+                    userName: { $nin: [ADMIN_USER] },
+                    $or: [
+                        { _id: mongoose.Types.ObjectId(masterId) },
+                        { masterUserId: masterId }
+                    ]
+                });
+                //            const users = await User.find({});
+                return users.map(user => {
+                    user._id = user._id.toString();
+                    return user;
+                });
+            }
+        ),
         user: authenticated(async (parent, args, { db: { User } }) => {
             const user = await User.findById(args.id);
             return user;
@@ -72,15 +84,23 @@ export default {
         ) => {
             const user = await User.findOne({ email });
 
+            if (user) {
+                if (user.method != "email") {
+                    throw new Error(
+                        `Usuário já cadastrado pelo método: ${user.method}`
+                    );
+                }
+
+                const useremail = await UserEmail.findOne({ userId: user._id });
+
+                if (!useremail) {
+                    throw new Error("unverified-email");
+                }
+            }
+
             let errorMsg = "Não autorizado, email ou senha inválido(s)!";
             if (!user || !bcrypt.compareSync(password, user.password)) {
                 throw new Error(errorMsg);
-            }
-
-            const useremail = await UserEmail.findOne({ userId: user._id });
-
-            if (!useremail) {
-                throw new Error("unverified-email");
             }
 
             const payload = { sub: user._id };
@@ -103,53 +123,34 @@ export default {
         loginvalidemail: async (
             parent,
             { hash },
-            { db: { User, UserEmail, AccessLog } }
+            { db: { User, UserEmail } }
         ) => {
-            console.log("URL: ", hash);
+            const hashdec = decrypt(hash);
 
-            const id = "5d57e5e299ec554540512583";
-            const email = "anderllr@gmail.com";
+            let hashParts = hashdec.split("|");
+            let id = hashParts.shift().replace("id:", "");
+            let email = hashParts.join("|").replace("email:", "");
 
-            const v = `id:${id}|email:${email}`;
-            console.log("V: ", v);
-            const en = encrypt(v);
-            console.log("Encrypt: ", en);
+            const user = await User.findOne({ email });
 
-            const d = decrypt(en);
-            console.log("Decrypt: ", d);
-
-            let textParts = d.split("|");
-
-            const idR = textParts.shift().replace("id:", "");
-            const emailR = textParts.join("|").replace("email:", "");
-
-            const obj = { idR, emailR };
-            console.log("Obj: ", obj);
-
-            return { result: "success" };
-            //TODO: Rotina de validação do e-mail
-            /* const user = await User.findOne({ email });
-
-            let errorMsg = "Não autorizado, email ou senha inválido(s)!";
-            if (!user || !bcrypt.compareSync(password, user.password)) {
-                throw new Error(errorMsg);
+            if (!user) {
+                throw new Error("invalid-link");
+            }
+            if (user._id != id) {
+                throw new Error("invalid-id");
             }
 
-            const payload = { sub: user._id };
+            const useremail = await UserEmail.findOne({ userId: user._id });
 
-            const { id, userName, name, method } = user;
+            if (useremail) {
+                throw new Error("verified-email");
+            }
 
-            //Agora grava o log de acesso
-            await new AccessLog(inputLog(id, "email")).save();
+            const input = { userId: user._id, email };
 
-            return {
-                id,
-                name,
-                email,
-                method,
-                userName,
-                token: jwt.sign(payload, JWT_SECRET)
-            }; */
+            await new UserEmail(input).save();
+
+            return { result: "success" };
         },
         loginauth: async (
             parent,
@@ -164,7 +165,9 @@ export default {
                     userName: email,
                     email,
                     method: signInMethod,
-                    password: "Sign2019@@"
+                    password: "Sign2019@@",
+                    masterUserId: "same",
+                    stUser: "ATIVO"
                 };
                 //Cadastra o usuário, pois o acesso dele já foi confirmado
                 user = await new User(inputUser).save();
@@ -178,7 +181,7 @@ export default {
 
             const payload = { sub: user._id };
 
-            const { id, userName, method } = user;
+            const { id, userName, masterUserId, stUser, method } = user;
 
             //Agora grava o log de acesso
             await new AccessLog(
@@ -191,30 +194,50 @@ export default {
                 email,
                 method,
                 userName,
+                masterUserId,
+                stUser,
                 token: jwt.sign(payload, JWT_SECRET)
             };
         },
         createUser: authenticated(
-            async (parent, { input }, { db: { User } }) => {
-                const user = await new User(input).save();
+            async (parent, { input }, { db: { User }, authUser }) => {
+                let user = await User.findOne({ email: input.email });
 
-                //se deu tudo certo no cadastro do usuário vai mandar o link de boas vindas
                 if (user) {
-                    //Envia e-mail de boas vindas para autenticação
-
-                    const res = sendEmail(
-                        "anderllr@gmail.com",
-                        "E-mail de boas vindas"
+                    throw new Error(
+                        `Usuário já cadastrado pelo método: ${user.method}`
                     );
-                    return { result: res ? "sucess" : "error" };
                 }
+
+                if (!input.masterUserId) {
+                    input.masterUserId =
+                        authUser.masterUserId &&
+                        authUser.masterUserId !== "same"
+                            ? authUser.masterUserId
+                            : authUser.id;
+                }
+                input.stUser = "ATIVO";
+
+                user = await new User(input).save();
 
                 return user;
             }
         ),
         updateUser: authenticated(
-            async (parent, { id, input }, { db: { User } }) => {
+            async (parent, { id, input }, { db: { User }, authUser }) => {
                 const user = await User.findById(id);
+
+                if (!user.masterUserId) {
+                    input.masterUserId =
+                        authUser.masterUserId &&
+                        authUser.masterUserId !== "same"
+                            ? authUser.masterUserId
+                            : authUser.id;
+                }
+
+                if (!user.stUser) {
+                    input.stUser = "ATIVO";
+                }
 
                 user.set(input);
                 await user.save();
@@ -283,10 +306,9 @@ export default {
             const result = await sendEmail(
                 email,
                 "Bem vindo ao Servicei",
-                `${rootUrl}/v=${v}`
+                `${rootUrl}/verify/email?v=${v}`
             );
 
-            console.log("result: ", result);
             return { result: "success" };
         }
     }

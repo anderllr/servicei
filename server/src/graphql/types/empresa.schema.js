@@ -5,9 +5,8 @@ const empresaTypes = `
         idCpfCnpj: String!
         razao: String!
         fantasia: String!
-        inscEstadual: String
-        inscMunicipal: String
         email: String!
+        cep: String!
         estadoId: String!
         cidadeId: String!
         endereco: String!
@@ -18,15 +17,15 @@ const empresaTypes = `
         celular: String
         obs: String
         stEmpresa: String!
+        masterUserId: String
     }
 
     input EmpresaInput {
         idCpfCnpj: String!
         razao: String!
         fantasia: String!
-        inscEstadual: String
-        inscMunicipal: String
         email: String!
+        cep: String!
         estadoId: String!
         cidadeId: String!
         endereco: String!
@@ -44,12 +43,14 @@ const empresaTypes = `
 const empresaQueries = `
     empresas: [Empresa]
     empresaById(id: ID!): Empresa!
+    empresaByCpfCnpj(idCpfCnpj: String!): Empresa
     empresasByName(name: String!): [Empresa]
 `;
 
 const empresaMutations = `
     createEmpresa(input: EmpresaInput!): Empresa
     updateEmpresa(id: ID!, input: EmpresaInput!): Empresa
+    changeStatus(id: ID!): Boolean
     deleteEmpresa(id: ID!): Boolean
 `;
 

@@ -25,11 +25,13 @@ const UserSchema = mongoose.Schema({
         ]
     },
     method: { type: String, required: true, trim: true },
+    masterUserId: { type: String, required: true, trim: true},
     password: {
         type: String,
         required: false,
         trim: true
-    }
+    },
+    stUser: { type: String, required: true, trim: true }
 });
 
 UserSchema.pre("save", function save(next) {

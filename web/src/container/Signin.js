@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { graphql, compose } from "react-apollo";
+import { graphql } from "@apollo/react-hoc";
+import { compose } from "react-apollo";
 import Button from "@material-ui/core/Button";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -13,9 +14,8 @@ import { Fab } from "@material-ui/core";
 //GraphQl Queries
 import {
     EMAIL_LOGIN,
-    AUTH_LOGIN,
-    EMAIL_VALIDATE,
-    SEND_EMAIL_VALIDATE
+    SEND_EMAIL_VALIDATE,
+    AUTH_LOGIN
 } from "Mutations/userMutation";
 
 // components
@@ -51,7 +51,7 @@ class Signin extends Component {
         const fullUrl = window.location.href;
         let rootUrl = fullUrl.replace(this.props.location.pathname, "");
         this.props.sendEmailValidate({
-            variables: { email: "anderllr@email.com", rootUrl }
+            variables: { email: this.state.email, rootUrl }
         });
     };
     /**
@@ -88,14 +88,14 @@ class Signin extends Component {
                                             className="mr-15"
                                             onClick={() => this.onUserSignUp()}
                                         >
-                                            Create New account?
+                                            Criar uma nova Conta?
                                         </a>
                                         <Button
                                             variant="contained"
                                             className="btn-light"
                                             onClick={() => this.onUserSignUp()}
                                         >
-                                            Sign Up
+                                            Criar Conta
                                         </Button>
                                     </div>
                                 </div>
@@ -109,12 +109,12 @@ class Signin extends Component {
                                     <div className="session-body text-center">
                                         <div className="session-head mb-30">
                                             <h2 className="font-weight-bold">
-                                                Get started with{" "}
+                                                Bem vindo ao{" "}
                                                 {AppConfig.brandName}
                                             </h2>
                                             <p className="mb-0">
-                                                Most powerful ReactJS admin
-                                                panel
+                                                A ferramenta que faltava para
+                                                simplificar sua gestão
                                             </p>
                                         </div>
                                         <Form>
@@ -125,7 +125,7 @@ class Signin extends Component {
                                                     name="user-mail"
                                                     id="user-mail"
                                                     className="has-input input-lg"
-                                                    placeholder="Enter Email Address"
+                                                    placeholder="Informe o E-mail"
                                                     onChange={event =>
                                                         this.setState({
                                                             email:
@@ -145,7 +145,7 @@ class Signin extends Component {
                                                     name="user-pwd"
                                                     id="pwd"
                                                     className="has-input input-lg"
-                                                    placeholder="Password"
+                                                    placeholder="Senha"
                                                     onChange={event =>
                                                         this.setState({
                                                             password:
@@ -189,7 +189,7 @@ class Signin extends Component {
                                                 </Button>
                                             </FormGroup>
                                         </Form>
-                                        <p className="mb-20">or sign in with</p>
+                                        <p className="mb-20">ou acesse com</p>
                                         <Fab
                                             size="small"
                                             variant="round"
@@ -247,16 +247,16 @@ class Signin extends Component {
                                             <i className="zmdi zmdi-github-alt" />
                                         </Fab>
                                         <p className="text-muted">
-                                            By signing up you agree to{" "}
+                                            Assinando você está de acordo com{" "}
                                             {AppConfig.brandName}
                                         </p>
                                         <p className="mb-0">
                                             <a
                                                 target="_blank"
-                                                href="#/terms-condition"
+                                                href="/terms-condition"
                                                 className="text-muted"
                                             >
-                                                Terms of Service
+                                                Termos e Condições de Uso
                                             </a>
                                         </p>
                                     </div>
@@ -285,9 +285,6 @@ export default compose(
     }),
     graphql(AUTH_LOGIN, {
         name: "loginauth"
-    }),
-    graphql(EMAIL_VALIDATE, {
-        name: "loginvalidemail"
     }),
     graphql(SEND_EMAIL_VALIDATE, {
         name: "sendEmailValidate"

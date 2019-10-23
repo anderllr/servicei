@@ -29,6 +29,7 @@ import CRMLayout from './CRMLayout';
 // app signin
 import AppSignIn from './Signin';
 import AppSignUp from './Signup';
+import VerifyEmail from './VerifyEmail';
 
 // async components
 import {
@@ -82,7 +83,8 @@ class App extends Component {
             <AdminRoute path="/boxed" component={RctBoxedLayout} />
             <AdminRoute path="/dashboard" component={CRMLayout} authUser={user}/>
             <Route path="/signin" component={AppSignIn} />
-            <Route path="/signup" component={AppSignUp} />
+              <Route path="/signup" component={AppSignUp} />
+              <Route path="/verify/email" component={VerifyEmail} />
             <Route path="/session/login" component={AsyncSessionLoginComponent} />
             <Route path="/session/register" component={AsyncSessionRegisterComponent} />
             <Route path="/session/lock-screen" component={AsyncSessionLockScreenComponent} />

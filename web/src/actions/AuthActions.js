@@ -12,7 +12,6 @@ import {
     LOGIN_USER_SUCCESS,
     LOGIN_USER_FAILURE,
     LOGOUT_USER,
-    SIGNUP_USER,
     SIGNUP_USER_SUCCESS,
     SIGNUP_USER_FAILURE
 } from "Actions/types";
@@ -33,8 +32,8 @@ export const signinUser = (history, stateUser, loginuser) => dispatch => {
     loginuser({ variables: { email, password } })
         .then(({ data: { loginemail } }) => {
             const { token, ...user } = loginemail;
-
-            localStorage.setItem("access_token_", token);
+            console.log("Token action: ", token);
+            sessionStorage.setItem("access_token_", token);
             dispatch({ type: LOGIN_USER_SUCCESS, payload: user });
             history.push("/");
             NotificationManager.success(`Olá ${user.name}!`);
@@ -48,7 +47,6 @@ export const signinUser = (history, stateUser, loginuser) => dispatch => {
 
             message === "unverified-email"
                 ? (dispatch({ type: UNVERIFIED_EMAIL }),
-                  console.log("Message: ", message),
                   NotificationManager.error("E-mail ainda não validado    "))
                 : NotificationManager.error(message);
         });
@@ -57,14 +55,15 @@ export const signinUser = (history, stateUser, loginuser) => dispatch => {
 /**
  * Redux Action To Signout User From  Firebase
  */
-export const logoutUserFromFirebase = () => dispatch => {
+export const logoutUserFromFirebase = apolloClient => dispatch => {
     firebase
         .auth()
         .signOut()
         .then(() => {
             dispatch({ type: LOGOUT_USER });
-            localStorage.removeItem("user_id");
-            NotificationManager.success("User Logout Successfully");
+            sessionStorage.removeItem("access_token_");
+            apolloClient.resetStore();
+            NotificationManager.success("Logout realizado com sucesso");
         })
         .catch(error => {
             NotificationManager.error(error.message);
@@ -75,19 +74,48 @@ export const logoutUserFromFirebase = () => dispatch => {
  * Redux Action To Signup User
  */
 
-export const signupUser = (history, stateUser, createUser) => dispatch => {
+export const signupUser = (
+    history,
+    stateUser,
+    createuser,
+    sendemailvalidate,
+    rootUrl
+) => dispatch => {
     const { name, email, password } = stateUser;
+
+    const userInput = {
+        name,
+        userName: email,
+        email,
+        method: "email",
+        masterUserId: "same",
+        password
+    };
     //Execute mutation
     createuser({
-        variables: { name, userName: email, email, method: "email", password }
+        variables: { userInput }
     })
-        .then(({ data: { createuser } }) => {
-            const { id } = createUser;
-
+        .then(({ data }) => {
             dispatch({ type: SIGNUP_USER_SUCCESS });
-            NotificationManager.success(
-                "Conta criada com sucesso, um e-mail foi enviado para validação!"
-            );
+            NotificationManager.success("Conta criada com sucesso!");
+
+            //Agora envia o e-mail de validação
+            sendemailvalidate({
+                variables: { email, rootUrl }
+            })
+                .then(() => {
+                    NotificationManager.success(
+                        "Um e-mail foi enviado para sua conta para validação!"
+                    );
+                    history.push("/signin");
+                })
+                .catch(e => {
+                    //TODO criar uma action que vai alterar o erro
+                    const { graphQLErrors } = e;
+
+                    dispatch({ type: SIGNUP_USER_FAILURE });
+                    NotificationManager.error(graphQLErrors[0].message);
+                });
         })
         .catch(e => {
             //TODO criar uma action que vai alterar o erro
@@ -150,7 +178,7 @@ export const signinUserWithAuth = (
                 .then(({ data: { loginauth } }) => {
                     const { token, ...user } = loginauth;
 
-                    localStorage.setItem("access_token_", token);
+                    sessionStorage.setItem("access_token_", token);
                     dispatch({ type: LOGIN_USER_SUCCESS, payload: user });
                     history.push("/");
                     NotificationManager.success(`Olá ${user.name}!`);

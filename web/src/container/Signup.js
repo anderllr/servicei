@@ -1,6 +1,6 @@
-
 import React, { Component } from "react";
-import { graphql, compose } from "react-apollo";
+import { graphql } from "@apollo/react-hoc";
+import { compose } from "react-apollo";
 import Button from "@material-ui/core/Button";
 import { connect } from "react-redux";
 import AppBar from "@material-ui/core/AppBar";
@@ -12,7 +12,11 @@ import QueueAnim from "rc-queue-anim";
 import { Fab } from "@material-ui/core";
 
 //GraphQl Queries
-import { CREATE_USER, AUTH_LOGIN } from "Mutations/userMutation";
+import {
+    CREATE_USER,
+    AUTH_LOGIN,
+    SEND_EMAIL_VALIDATE
+} from "Mutations/userMutation";
 
 // components
 import { SessionSlider } from "Components/Widgets";
@@ -36,11 +40,20 @@ class Signup extends Component {
      * On User Signup
      */
     onUserSignUp() {
-        if (this.state.email !== "" && this.state.password !== "") {
+        const fullUrl = window.location.href;
+        let rootUrl = fullUrl.replace(this.props.location.pathname, "");
+
+        if (
+            this.state.email !== "" &&
+            this.state.password !== "" &&
+            this.state.confirmPassword
+        ) {
             this.props.signupUser(
                 this.props.history,
                 this.state,
-                this.props.createuser
+                this.props.createuser,
+                this.props.sendemailvalidate,
+                rootUrl
             );
         }
     }
@@ -68,6 +81,7 @@ class Signup extends Component {
                                                 src={AppConfig.appLogo}
                                                 alt="session-logo"
                                                 width="110"
+                                                className="img-fluid"
                                                 height="35"
                                             />
                                         </Link>
@@ -77,7 +91,7 @@ class Signup extends Component {
                                             to="/signin"
                                             className="mr-15 text-white"
                                         >
-                                            Already have an account?
+                                            Você já tem uma conta?
                                         </Link>
                                         <Button
                                             component={Link}
@@ -85,7 +99,7 @@ class Signup extends Component {
                                             variant="contained"
                                             className="btn-light"
                                         >
-                                            Sign In
+                                            Clique aqui
                                         </Button>
                                     </div>
                                 </div>
@@ -99,7 +113,7 @@ class Signup extends Component {
                                     <div className="session-body text-center">
                                         <div className="session-head mb-15">
                                             <h2>
-                                                Get started with{" "}
+                                                Bem vindo ao{" "}
                                                 {AppConfig.brandName}
                                             </h2>
                                         </div>
@@ -197,11 +211,11 @@ class Signup extends Component {
                                                         this.onUserSignUp()
                                                     }
                                                 >
-                                                    Sign Up
+                                                    Registrar
                                                 </Button>
                                             </FormGroup>
                                         </Form>
-                                        <p className="mb-20">or sign in with</p>
+                                        <p className="mb-20">ou acesse com</p>
                                         <Fab
                                             size="small"
                                             variant="round"
@@ -259,15 +273,15 @@ class Signup extends Component {
                                             <i className="zmdi zmdi-github-alt" />
                                         </Fab>
                                         <p className="text-muted">
-                                            By signing up you agree to{" "}
-                                            {AppConfig.brandName}
+                                            Assinando você está de acordo com
+                                            Servicei {AppConfig.brandName}
                                         </p>
                                         <p>
                                             <Link
                                                 to="/terms-condition"
                                                 className="text-muted"
                                             >
-                                                Terms of Service
+                                                Termos e Condições de Uso
                                             </Link>
                                         </p>
                                     </div>
@@ -296,6 +310,9 @@ export default compose(
     }),
     graphql(AUTH_LOGIN, {
         name: "loginauth"
+    }),
+    graphql(SEND_EMAIL_VALIDATE, {
+        name: "sendemailvalidate"
     }),
     connect(
         mapStateToProps,
